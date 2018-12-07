@@ -80,8 +80,8 @@ type mapextra struct {
 // bucket content
 type stringMapCts struct {
 	hash   uint64
-	Keys   [8]string // depend on the key type
-	Values [8]string // depend on the value type
+	keys   [8]string // depend on the key type
+	values [8]string // depend on the value type
 	plink  unsafe.Pointer
 }
 
