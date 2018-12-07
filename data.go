@@ -29,7 +29,7 @@ type rtype struct {
 }
 
 type emptyInterface struct {
-	typ  *rtype			// pointer to data type descripter
+	typ  *rtype         // pointer to data type descripter
 	word unsafe.Pointer // pointer to data
 }
 
@@ -43,8 +43,8 @@ type iTab struct {
 
 type nonEmptyInterface struct {
 	// see ../runtime/iface.go:/Itab
-	itab *iTab			// pointer to itab
-	word unsafe.Pointer	// pointer to data
+	itab *iTab          // pointer to itab
+	word unsafe.Pointer // pointer to data
 }
 
 // A bucket for a Go map.
@@ -77,11 +77,12 @@ type mapextra struct {
 	nextOverflow *bmap
 }
 
-type stringMapCts struct{
-	hash uint64
-	Kkeys [8]string
-	Values [8]string
-	plink unsafe.Pointer
+// bucket content
+type stringMapCts struct {
+	hash   uint64
+	Keys   [8]string // depend on the key type
+	Values [8]string // depend on the value type
+	plink  unsafe.Pointer
 }
 
 type hmap struct {
@@ -94,20 +95,20 @@ type hmap struct {
 	hash0     uint32 // hash seed
 
 	buckets    *[2]stringMapCts // array of 2^B Buckets. may be nil if count==0.
-	oldbuckets unsafe.Pointer // previous bucket array of half the size, non-nil only when growing
-	nevacuate  uintptr        // progress counter for evacuation (buckets less than this have been evacuated)
+	oldbuckets unsafe.Pointer   // previous bucket array of half the size, non-nil only when growing
+	nevacuate  uintptr          // progress counter for evacuation (buckets less than this have been evacuated)
 
 	extra *mapextra // optional fields
 }
 
 type rmap struct {
-	 mm *hmap
+	mm *hmap
 }
 
 // empty interface
 func InsightEmptyInterface(i interface{}) {
 	ei := *(*emptyInterface)(unsafe.Pointer(&i))
-	fmt.Printf("**** Insight an empty interface from address : %p ****\n",&ei)
+	fmt.Printf("**** Insight an empty interface from address : %p ****\n", &ei)
 	fmt.Printf("Level1(addr=%p,size=%d) : %#v\n", &ei, unsafe.Sizeof(ei), ei)
 	fmt.Printf("Level2(addr=%p,size=%d) : typ=%#v\n", ei.typ, unsafe.Sizeof(*(ei.typ)), *(ei.typ))
 	fmt.Printf("Level3(addr=%p,size=%d) : typ.alg=%#v\n", ei.typ.alg, unsafe.Sizeof(*(ei.typ.alg)), *(ei.typ.alg))
@@ -117,7 +118,7 @@ func InsightEmptyInterface(i interface{}) {
 // non empty interface
 func InsightNonEmptyInterface(p unsafe.Pointer) {
 	ei := *(*nonEmptyInterface)(p)
-	fmt.Printf("**** Insight an non-empty interface from address : %p ****\n",p)
+	fmt.Printf("**** Insight an non-empty interface from address : %p ****\n", p)
 	fmt.Printf("Level1(addr=%p,size=%d) : %#v\n", &ei, unsafe.Sizeof(ei), ei)
 	fmt.Printf("Level2(addr=%p,size=%d) : itab=%#v\n", ei.itab, unsafe.Sizeof(*(ei.itab)), *(ei.itab))
 	fmt.Printf("Level3(addr=%p,size=%d) : itab.ityp=%#v\n", ei.itab.ityp, unsafe.Sizeof(*(ei.itab.ityp)), *(ei.itab.ityp))
@@ -125,13 +126,13 @@ func InsightNonEmptyInterface(p unsafe.Pointer) {
 }
 
 // map[string]string
-func InsightMapString(a map[string]string){
+func InsightMapString(a map[string]string) {
 
 	em := *(*rmap)(unsafe.Pointer(&a))
-	fmt.Printf("**** Insight an map[string]string from address : %p ****\n",&em)
+	fmt.Printf("**** Insight an map[string]string from address : %p ****\n", &em)
 	fmt.Printf("Level1(addr=%p,size=%d) : %#v\n", &em, unsafe.Sizeof(em), em)
 	fmt.Printf("Level2(addr=%p,size=%d) : %#v\n", em.mm, unsafe.Sizeof(*(em.mm)), *(em.mm))
-	fmt.Printf("Level3(addr=%p,size=%d) : %#v\n", em.mm.buckets,unsafe.Sizeof(*(em.mm.buckets)),*(em.mm.buckets))
+	fmt.Printf("Level3(addr=%p,size=%d) : %#v\n", em.mm.buckets, unsafe.Sizeof(*(em.mm.buckets)), *(em.mm.buckets))
 }
 
 // insight memory values from the head address of an object
@@ -190,16 +191,15 @@ func InsightMem(i interface{}, method ...string) []unsafe.Pointer {
 	return rts
 }
 
-func InsightMemString(a *string){
-	InsightMem(*a,"p64","i64")
+func InsightMemString(a *string) {
+	InsightMem(*a, "p64", "i64")
 }
 
-func InsightMemArray(a *[4]string){
-	InsightMem(*a,"p64","i64","p64","i64","p64","i64","p64","i64")
+func InsightMemArray(a *[4]string) {
+	InsightMem(*a, "p64", "i64", "p64", "i64", "p64", "i64", "p64", "i64")
 }
 
-func InsightMemSlice(i interface{}){
+func InsightMemSlice(i interface{}) {
 	ei := *(*emptyInterface)(unsafe.Pointer(&i))
-	InsightMem(ei.word,"p64","i64","i64")
+	InsightMem(ei.word, "p64", "i64", "i64")
 }
-
